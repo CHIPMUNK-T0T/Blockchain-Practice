@@ -2,8 +2,12 @@ import Crypto
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from Crypto.Hash import SHA256 
-from Crypto.Signature import pkcs1_15
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Signature import pkcs1_15
+
+import ecdsa
+from ecdsa.keys import SigningKey
+from ecdsa.keys import VerifyingKey
 
 def generate_key(KEY_LENGTH=2048):
     random_value = Random.new().read
@@ -21,6 +25,14 @@ def vertify_signature(message, key_pub, signature):
         pkcs1_15.new(key_pub).verify(message_hash, signature)
         vertify = True
     except ValueError:
+        vertify = False
+    return vertify
+
+def ecdsa_vertify_signature(message, key_vertify, signature):
+    try:
+        VerifyingKey.verify(self=key_vertify, signature=signature, data=message)
+        vertify = True
+    except ecdsa.keys.BadSignatureError:
         vertify = False
     return vertify
 
@@ -61,3 +73,15 @@ print_vertify_signature(vertify_signature(message, key_1_pub, sign_1))
 
 # key_2の公開鍵から署名文の妥当性確認
 print_vertify_signature(vertify_signature(message, key_2_pub, sign_1))
+
+# ECDSAアルゴリズム
+ecdsa_key_secret = SigningKey.generate(curve=ecdsa.SECP256k1)
+ecdsa_key_vertify = ecdsa_key_secret.verifying_key
+
+ecdsa_signature = ecdsa_key_secret.sign(message)
+
+# ecdsaによる署名文の妥当性確認
+print_vertify_signature(ecdsa_vertify_signature(message, ecdsa_key_vertify, ecdsa_signature))
+
+# ecdsaによる署名文の妥当性確認
+print_vertify_signature(ecdsa_vertify_signature(b'dammy message', ecdsa_key_vertify, ecdsa_signature))
