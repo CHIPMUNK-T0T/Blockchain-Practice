@@ -8,4 +8,5 @@
 
 * Package
     - Python 3.7.4
-    
+    - pycryptodome 3.17
+    - ecdsa 0.18.0
